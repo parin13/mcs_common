@@ -16,3 +16,6 @@ var/
 *.eggs
 .mypy_cache/
 .vscode
+.idea*
+mcs_common/.idea/*
+mcs_common/.idea/.gitignore

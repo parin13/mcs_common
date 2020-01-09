@@ -3,11 +3,12 @@
 
 __version__ = "0.0.0.1"
 
-from mcs_common.services import logger, mongo_db, custom_exception
+from mcs_common.services import logger, mongo_db, services_mysql ,custom_exception
 from . import ref_strings
 
 import os, sys
 from os.path import dirname, join, abspath
+
 sys.path.insert(0, abspath(join(dirname(__file__), '..')))
 
 def get_error_traceback(sys, e):
@@ -27,11 +28,14 @@ class CommonUtil:
     def create_logger(self):
         self.logger = logger.CreateLogger(self.logs_directory, self.log_category)
 
-    @staticmethod
-    def mongo_init(log, host, port, db_name):
-        try:
-            db = mongo_db.CreateDbConnection(log, host, port, db_name)
-            return db.init()
 
+    def mysql_init(self, host, user, port, password, db_name):
+        try:
+            print ('inside mysql_init')
+            print (host,user,port)
+            db_instance = services_mysql.CreateDbConnection(self.logger, host, user, port, password, db_name)
+            return db_instance
         except Exception as e:
-            raise
+            raise e
+
+
