@@ -5,19 +5,6 @@ import MySQLdb
 import os, sys
 
 
-def query_from_filter(filters,type='AND'):
-    params = ''
-    for key, value in filters.items():
-        params += "%s = '%s' %s " % (key, value, type)
-    return params[:-(len(type)+2)]
-
-def make_dict_factory(cursor):
-    column_names = [d[0].lower() for d in cursor.description]
-
-
-def conenct_db(inst):
-    pass
-
 class CreateDbConnection:
 
     def __init__(self, logger, host, user, port, password, db_name):
@@ -54,7 +41,7 @@ class CreateDbConnection:
         try:
             data = None
             db_con = self.init()
-            cursor = db_con.cursor()
+            cursor = db_con.cursor(MySQLdb.cursors.DictCursor)
 
             if columns:
                 columns = ','.join(columns)
@@ -70,9 +57,7 @@ class CreateDbConnection:
             if sort:
                 query += ' ORDER BY timestamp DESC '
 
-            print (query)
             cursor.execute(query)
-            cursor.rowfactory = make_dict_factory(cursor)
             data = cursor.fetchall()
             self.logger.msg_logger('>>>>>>>> MYSQL Find Success : %s' %(query))
 
