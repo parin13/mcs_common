@@ -19,3 +19,4 @@ var/
 .idea*
 mcs_common/.idea/*
 mcs_common/.idea/.gitignore
+.idea/vcs.xml

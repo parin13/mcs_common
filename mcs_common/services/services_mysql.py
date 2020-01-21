@@ -5,6 +5,12 @@ import MySQLdb
 import os, sys
 
 
+def query_from_filter(filters,type='AND'):
+    params = ''
+    for key, value in filters.items():
+        params += "%s = '%s' %s " % (key, value, type)
+    return params[:-(len(type)+2)]
+
 class CreateDbConnection:
 
     def __init__(self, logger, host, user, port, password, db_name):
@@ -16,11 +22,6 @@ class CreateDbConnection:
         self.password = password
 
     def init(self):
-        """
-        mongo db connection
-        :param logger
-        :return : mongo db connection
-        """
         try:
             db = MySQLdb.connect(
                 host=self.host,
@@ -28,13 +29,12 @@ class CreateDbConnection:
                 passwd=self.password,
                 db=self.db_name
             )
-            print("********db connection sucess*******")
             return db
 
         except Exception as e:
             error = common_util.get_error_traceback(sys, e)
             print (error)
-            self.logger.error_logger("services mysql connection : %s" % error)
+            self.logger.error_logger(" mysql init : %s" % error)
             raise e
 
     def find_sql(self, table_name, filters={}, columns='', sort=False):
@@ -67,3 +67,35 @@ class CreateDbConnection:
         finally:
             if db_con: db_con.close()
             return data
+
+    def insert_sql(self, table_name, insert_data):
+        try:
+            data = None
+            ret_status = False
+            print (insert_data)
+
+            db_con = self.init()
+            cursor = db_con.cursor(MySQLdb.cursors.DictCursor)
+          
+            query = 'insert into %s (%s) Values (%s)' %(table_name, ','.join([key for key,value in insert_data.items()]), ','.join([value for key,value in insert_data.items()]))
+            print(query)
+            cursor.execute(query)
+            db_con.commit()
+            ret_status = True
+            self.logger.msg_logger('>>>>>>>> MYSQL Insert Success : %s' %(query))
+
+        except Exception as e :
+            error = common_util.get_error_traceback(sys, e)
+            print (error)
+            self.logger.error_logger('insert_sql() : %s' % error)
+            raise e
+        finally:
+            if db_con: db_con.close()
+            return ret_status
+
+
+
+
+# insert into table_name (field1 , field2 ) values  (value1, value2);
+
+# {'k':'v' ,'k', 'v'}
