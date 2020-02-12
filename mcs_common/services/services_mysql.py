@@ -5,11 +5,30 @@ import MySQLdb
 import os, sys
 
 
-def query_from_filter(filters,type='AND'):
+def query_from_filter(filters, type='AND', search=False):
     params = ''
-    for key, value in filters.items():
-        params += "%s = '%s' %s " % (key, value, type)
+
+    if search:
+        for key, value in filters.items():
+            params += "lower({0}) LIKE '%{1}%' {2} ".format(key, value.lower(), type)
+    else:
+        for key, value in filters.items():
+            params += "%s = '%s' %s " % (key, value, type)
     return params[:-(len(type)+2)]
+
+
+
+def query_from_data(insert_data):
+    condition = ''
+    for key,value in insert_data.items():
+        if type(value) == str:
+            condition += "'{}'".format(value)+','
+        else:
+            condition += '{}'.format(value)+','
+
+    return condition[:-1]
+
+
 
 class CreateDbConnection:
 
@@ -72,12 +91,9 @@ class CreateDbConnection:
         try:
             data = None
             ret_status = False
-            print (insert_data)
-
             db_con = self.init()
             cursor = db_con.cursor(MySQLdb.cursors.DictCursor)
-          
-            query = 'insert into %s (%s) Values (%s)' %(table_name, ','.join([key for key,value in insert_data.items()]), ','.join([value for key,value in insert_data.items()]))
+            query = 'insert into %s (%s) Values (%s)' %(table_name, ','.join([key for key in insert_data]), query_from_data(insert_data))
             print(query)
             cursor.execute(query)
             db_con.commit()
@@ -92,10 +108,3 @@ class CreateDbConnection:
         finally:
             if db_con: db_con.close()
             return ret_status
-
-
-
-
-# insert into table_name (field1 , field2 ) values  (value1, value2);
-
-# {'k':'v' ,'k', 'v'}

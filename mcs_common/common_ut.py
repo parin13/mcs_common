@@ -38,4 +38,10 @@ class CommonUtil:
         except Exception as e:
             raise e
 
+    @staticmethod
+    def check_if_present(*args, **kwargs):
+        if not all( arg for arg in args):
+            raise custom_exception.UserException(ref_strings.Common.missing_required_params)
+        if not all(val for key, val in kwargs.items()):
+            raise custom_exception.UserException(ref_strings.Common.missing_required_params)    
 
