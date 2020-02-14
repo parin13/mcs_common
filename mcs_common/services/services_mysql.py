@@ -18,7 +18,7 @@ def query_from_filter(filters, type='AND', search=False):
 
 
 
-def query_from_data(insert_data):
+def query_from_data(insert_data):  #formulate query for insert data
     condition = ''
     for key,value in insert_data.items():
         if type(value) == str:
@@ -108,3 +108,36 @@ class CreateDbConnection:
         finally:
             if db_con: db_con.close()
             return ret_status
+
+
+    def update_sql(self, table_name, filters, updated_values):
+        """
+        """
+        db_con = None
+        ret_status = False
+        try:
+            print ("into db update")
+            print (table_name,filters,updated_values)
+
+            if self.find_sql(table_name, filters):
+                db_con = self.init()                
+                cursor = db_con.cursor(MySQLdb.cursors.DictCursor)
+
+                update_params = query_from_filter(updated_values,type=',')
+                filter_params = query_from_filter(filters)
+
+                query = 'UPDATE %s SET %s WHERE %s' % (table_name, update_params, filter_params)
+                print (query)
+                cursor.execute(query)
+                db_con.commit()
+                self.logger.msg_logger('>>>>>>>> MYSQL update Success : %s' % (query))
+                ret_status = True
+
+        except Exception as e:
+            error = common_util.get_error_traceback(sys, e)
+            self.logger.error_logger('update_sql : %s || %s'%(error, query))
+            raise error
+        finally:
+            if db_con : db_con.close()
+            return ret_status
+
