@@ -34,7 +34,7 @@ def get_version():
 
 setup(
     name="mcs_common",
-    version=get_version(),
+    version="0.0.01",
     author="parishilan",
     author_email="parishilanrayamajhi@gmail.com",
     description="",
